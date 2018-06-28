@@ -5,30 +5,25 @@
 #include <Wire.h>
 #include "DHT.h"
 #include <SimpleTimer.h>
-#define DHTPIN 2   // Chân DATA nối với D4
+#define DHTPIN 2  
 #define AS A0
-// Relay, nút nhấn
 #define DEN D3
 #define UP D7
 #define DOW D5
 #define NUOC D6
-#define PUMP_PIN D8   //Quat
-#define LAMP_PIN D0   //Den
-#define NUOC_PIN D9 // Bơm
+#define PUMP_PIN D8   
+#define LAMP_PIN D0   
+#define NUOC_PIN D9 
 #define DHTTYPE DHT22
-/* Thông số cho chế độ tự động */
 int ghnhiet = 35;
-/* TIMER */
-#define Thoigian 50L // 50s 
-#define READ_BUTTONS_TM   1L  // Tương ứng với giây
-#define READ_SOIL_HUM_TM  2L //Đọc cảm biến anh sang
-#define READ_AIR_DATA_TM  1L  //Đọc DHT
-#define AUTO_CTRL_TM      5L //Chế độ tư động
-//Token Blynk và wifi
-char auth[] = "b9f5f20c34c04645a94153b0c7336ec0"; // Blynk token
-char ssid[] = "ASUS_X018D"; //Tên wifi
-char pass[] = "12041204"; //Mật khẩu
-// Đèn trạng thái  quat
+#define Thoigian 50L
+#define READ_BUTTONS_TM   1L  
+#define READ_SOIL_HUM_TM  2L 
+#define READ_AIR_DATA_TM  1L  
+#define AUTO_CTRL_TM      5L 
+char auth[] = "authtoken"; // Blynk token
+char ssid[] = "wifiname"; 
+char pass[] = "wifipassword"; 
 WidgetLED QUAT1(V5);
 float tempDHT = 0;
 float doamDHT = 0;
@@ -37,9 +32,7 @@ boolean pumpStatus = 0;
 boolean lampStatus = 0;
 boolean nuocStatus = 0;
 void startTimers(void);
-// Khởi tạo timer
 SimpleTimer timer;
-// Khởi tạo cảm biến
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
 void setup() {
@@ -55,7 +48,7 @@ void setup() {
   dht.begin();
   aplyCmd();
   startTimers();
-  lcd.begin();// Turn on the blacklight and print a message.
+  lcd.begin();
   lcd.backlight();
   lcd.setCursor(0, 0);
   lcd.print("WELCOME TO OUR FARM");
@@ -63,13 +56,12 @@ void setup() {
   Blynk.virtualWrite(V1, LOW);
   Blynk.virtualWrite(V4, ghnhiet);
 }
-
 void loop() {
-  timer.run(); // Chạy SimpleTimer
+  timer.run(); 
   Blynk.run();
   readbutton();
 }
-BLYNK_WRITE(0) // Điều khiển đèn
+BLYNK_WRITE(0) 
 {
   int i = param.asInt();
   if (i == 1)
@@ -78,14 +70,14 @@ BLYNK_WRITE(0) // Điều khiển đèn
     aplyCmd();
   }
 }
-BLYNK_WRITE(1) // Điều khiển bơm
+BLYNK_WRITE(1) 
 {
   int i = param.asInt();
   if (i == 1)
   {
     bat_bom();
   }
-} BLYNK_WRITE(4) // Điều khiển bơm
+} BLYNK_WRITE(4) 
 {
   ghnhiet = param.asInt();
 }
@@ -95,8 +87,8 @@ void docanhsang(void)
   as = 0;
   for (i = 0; i < 20; i++)
   {
-    as += analogRead(AS); //Đọc giá trị cảm biến ánh sáng
-    delay(5);   // Đợi đọc giá trị ADC
+    as += analogRead(AS); 
+    delay(5);  
   }
   as = as / (i);
   as = map(as, 1023, 0, 0, 999);
@@ -108,7 +100,6 @@ void getDhtData(void)
 }
 void printData(void)
 {
-  // IN thông tin ra LCD
   lcd.setCursor(0, 1);
   lcd.print("  Temp    : "); lcd.print(tempDHT); lcd.setCursor(16, 1); lcd.print("|"); lcd.print(ghnhiet);
   lcd.setCursor(0, 2);
@@ -116,9 +107,6 @@ void printData(void)
   lcd.setCursor(0, 3);
   lcd.print("  Light   :     "); lcd.setCursor(13, 3); lcd.print(as);
 }
-/***************************************************
-  Thực hiện điều khiển các bơm
-****************************************************/
 void aplyCmd()
 {
   if (pumpStatus == 0) {
@@ -146,9 +134,6 @@ void aplyCmd()
     digitalWrite(NUOC_PIN, HIGH);
   }
 }
-/***************************************************
-  Hàm kiểm tra trạng thái phím bấm
-****************************************************/
 void che_tu_dong(void)
 {
   if (tempDHT > ghnhiet)
@@ -218,9 +203,6 @@ void tat_bom()
   nuocStatus = 0;
   aplyCmd();
 }
-/***************************************************
-  Khởi động Timers
-****************************************************/
 void startTimers(void)
 {
   timer.setInterval(500L, printData);
